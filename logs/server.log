@@ -1,0 +1,24 @@
+INFO:     Will watch for changes in these directories: ['/home/workspace']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [154] using StatReload
+INFO:     Started server process [156]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     172.20.0.1:36290 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:55504 - "HEAD / HTTP/1.1" 405 Method Not Allowed
+INFO:     172.20.0.1:36290 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:55508 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:55508 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:46892 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:46898 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:46898 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:48364 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:48364 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:51608 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:51612 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:56874 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:45572 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:45578 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:48706 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:48714 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
+INFO:     172.20.0.1:37162 - "GET /api/matches?type=live HTTP/1.1" 501 Not Implemented
