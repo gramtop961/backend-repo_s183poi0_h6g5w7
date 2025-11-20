@@ -6,7 +6,7 @@ import requests
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Cricket API Proxy", version="1.0")
+app = FastAPI(title="Cricket API Proxy", version="1.1")
 
 app.add_middleware(
     CORSMiddleware,
@@ -26,6 +26,10 @@ NEWS_SOURCES = [
     "https://www.espncricinfo.com/rss/content/story/feeds/0.xml",
     "https://www.icc-cricket.com/rss/news",
 ]
+
+
+def is_external_configured() -> bool:
+    return bool(CRICKET_API_KEY or (RAPIDAPI_KEY and RAPIDAPI_HOST))
 
 
 def sportmonks_get(path: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -54,6 +58,89 @@ def rapidapi_get(path: str, params: Optional[Dict[str, Any]] = None, base: str =
     return r.json()
 
 
+# -----------------
+# Sample Fallback Data (used when API keys are not configured)
+# -----------------
+SAMPLE_MATCHES: List[Dict[str, Any]] = [
+    {
+        "id": 10001,
+        "status": "LIVE",
+        "note": "IND need 45 runs in 36 balls",
+        "localteam": {"id": 6, "name": "India", "code": "IND"},
+        "visitorteam": {"id": 9, "name": "Australia", "code": "AUS"},
+        "venue": {"name": "Wankhede Stadium", "city": "Mumbai"},
+        "starting_at": "2025-03-05T14:00:00Z",
+        "runs": [
+            {"team_id": 6, "score": 285, "wickets": 4, "overs": 43.0, "inning": 2},
+            {"team_id": 9, "score": 329, "wickets": 8, "overs": 50.0, "inning": 1},
+        ],
+    },
+    {
+        "id": 10002,
+        "status": "UPCOMING",
+        "note": "ENG vs PAK - 1st T20I",
+        "localteam": {"id": 12, "name": "England", "code": "ENG"},
+        "visitorteam": {"id": 7, "name": "Pakistan", "code": "PAK"},
+        "venue": {"name": "Lord's", "city": "London"},
+        "starting_at": "2025-03-10T18:00:00Z",
+        "runs": [],
+    },
+]
+
+SAMPLE_DETAILS: Dict[str, Any] = {
+    "data": {
+        "id": 10001,
+        "status": "LIVE",
+        "note": "IND need 45 runs in 36 balls",
+        "localteam": {"id": 6, "name": "India", "code": "IND"},
+        "visitorteam": {"id": 9, "name": "Australia", "code": "AUS"},
+        "venue": {"name": "Wankhede Stadium", "city": "Mumbai"},
+        "runs": [
+            {"team_id": 9, "score": 329, "wickets": 8, "overs": 50.0, "inning": 1, "team": {"name": "Australia", "code": "AUS"}},
+            {"team_id": 6, "score": 285, "wickets": 4, "overs": 43.0, "inning": 2, "team": {"name": "India", "code": "IND"}},
+        ],
+        "batting": [
+            {"player_id": 101, "fixture_id": 10001, "team_id": 6, "runs": 88, "balls": 72, "fours": 7, "sixes": 2, "strike_rate": 122.2, "player": {"fullname": "Rohit Sharma"}},
+            {"player_id": 102, "fixture_id": 10001, "team_id": 6, "runs": 64, "balls": 55, "fours": 5, "sixes": 1, "strike_rate": 116.3, "player": {"fullname": "Virat Kohli"}},
+        ],
+        "bowling": [
+            {"player_id": 201, "fixture_id": 10001, "team_id": 9, "overs": 8.0, "medians": 0, "runs": 44, "wickets": 1, "economy": 5.50, "player": {"fullname": "Pat Cummins"}},
+            {"player_id": 202, "fixture_id": 10001, "team_id": 9, "overs": 7.0, "medians": 0, "runs": 39, "wickets": 2, "economy": 5.57, "player": {"fullname": "Mitchell Starc"}},
+        ],
+        "lineup": [
+            {"id": 101, "fullname": "Rohit Sharma", "position": {"name": "Batsman"}, "team_id": 6},
+            {"id": 102, "fullname": "Virat Kohli", "position": {"name": "Batsman"}, "team_id": 6},
+            {"id": 103, "fullname": "Shubman Gill", "position": {"name": "Batsman"}, "team_id": 6},
+            {"id": 201, "fullname": "Pat Cummins", "position": {"name": "Bowler"}, "team_id": 9},
+            {"id": 202, "fullname": "Mitchell Starc", "position": {"name": "Bowler"}, "team_id": 9},
+        ],
+        "balls": [
+            {"over": 43, "ball": 1, "score": "1", "batsman": "Virat Kohli", "bowler": "Pat Cummins", "comment": "Good length outside off, tapped to point."},
+            {"over": 42, "ball": 6, "score": "4", "batsman": "Virat Kohli", "bowler": "Pat Cummins", "comment": "Crashed through covers!"},
+            {"over": 42, "ball": 5, "score": "0", "batsman": "Virat Kohli", "bowler": "Pat Cummins", "comment": "Dot ball."},
+        ],
+        "scoreboards": [
+            {"type": "total", "scores": [{"team": "AUS", "runs": 329, "wickets": 8, "overs": 50.0}, {"team": "IND", "runs": 285, "wickets": 4, "overs": 43.0}]}
+        ],
+    }
+}
+
+SAMPLE_TWEETS = [
+    {
+        "id": "1",
+        "text": "What a knock by Virat today! #INDvAUS",
+        "created_at": "2025-03-05T16:20:00Z",
+        "metrics": {"like_count": 1200, "retweet_count": 230, "reply_count": 45},
+    },
+    {
+        "id": "2",
+        "text": "Pitch looks like a belter. Expect 350+!",
+        "created_at": "2025-03-05T16:05:00Z",
+        "metrics": {"like_count": 420, "retweet_count": 67, "reply_count": 10},
+    },
+]
+
+
 @app.get("/")
 def read_root():
     return {"message": "Cricket Backend Running", "provider": API_PROVIDER}
@@ -68,7 +155,7 @@ def hello():
 def test_database():
     response = {
         "backend": "✅ Running",
-        "external_api": "⚠️ Not Configured" if not (CRICKET_API_KEY or RAPIDAPI_KEY) else "✅ Configured",
+        "external_api": "✅ Configured" if is_external_configured() else "⚠️ Not Configured (using sample data)",
         "provider": API_PROVIDER,
         "time": int(time.time()),
     }
@@ -77,10 +164,21 @@ def test_database():
 
 @app.get("/api/matches")
 def get_matches(type: str = Query("live", pattern="^(live|upcoming|completed)$")):
-    """Return simplified match lists for live/upcoming/completed."""
+    """Return simplified match lists for live/upcoming/completed.
+    Falls back to sample data when external provider isn't configured.
+    """
     try:
+        if not is_external_configured():
+            # Filter sample based on requested type
+            if type == "live":
+                matches = [m for m in SAMPLE_MATCHES if m["status"] == "LIVE"]
+            elif type == "upcoming":
+                matches = [m for m in SAMPLE_MATCHES if m["status"] == "UPCOMING"]
+            else:
+                matches = []
+            return {"type": type, "matches": matches}
+
         if API_PROVIDER == "sportmonks":
-            # SportMonks examples endpoints
             endpoint = {
                 "live": "livescores",
                 "upcoming": "fixtures",
@@ -109,8 +207,6 @@ def get_matches(type: str = Query("live", pattern="^(live|upcoming|completed)$")
             matches = [to_card(m) for m in raw_matches]
             return {"type": type, "matches": matches}
         else:
-            # RapidAPI Cricbuzz style
-            # Using sample endpoints; exact paths depend on host
             path = {
                 "live": "matches/v1/live",
                 "upcoming": "matches/v1/upcoming",
@@ -138,8 +234,19 @@ def get_matches(type: str = Query("live", pattern="^(live|upcoming|completed)$")
 
 @app.get("/api/match/{match_id}")
 def get_match_details(match_id: str):
-    """Match details: commentary, fall of wickets, scoreboard, playing XI, simplified response."""
+    """Match details: commentary, balls, scoreboard, playing XI, simplified response.
+    Falls back to sample data when external provider isn't configured.
+    """
     try:
+        if not is_external_configured():
+            if str(match_id) == str(SAMPLE_DETAILS.get("data", {}).get("id")):
+                return SAMPLE_DETAILS
+            # For unknown IDs in sample mode, try mapping from SAMPLE_MATCHES
+            for m in SAMPLE_MATCHES:
+                if str(m["id"]) == str(match_id):
+                    return SAMPLE_DETAILS  # Return the same shape for simplicity
+            raise HTTPException(status_code=404, detail="Sample match not found")
+
         if API_PROVIDER == "sportmonks":
             params = {"include": ",".join([
                 "localteam,visitorteam,venue",
@@ -149,7 +256,6 @@ def get_match_details(match_id: str):
             data = sportmonks_get(f"fixtures/{match_id}", params)
             return data
         else:
-            # RapidAPI provider - placeholder paths
             details = rapidapi_get(f"mcenter/v1/{match_id}")
             return details
     except HTTPException:
@@ -162,8 +268,6 @@ def get_match_details(match_id: str):
 def get_rankings(format: str = Query("odi", pattern="^(test|odi|t20)$")):
     """ICC rankings via public ICC site JSON if available, else fallback sample."""
     try:
-        # ICC publishes rankings pages; no official public JSON guaranteed. We'll use scraped JSON endpoints if available
-        # Fallback: simple curated sample
         url = f"https://www.icc-cricket.com/iccrankings/api/{format}/men/teams"
         r = requests.get(url, timeout=15)
         if r.status_code == 200:
@@ -199,7 +303,6 @@ def get_news():
                 })
         except Exception:
             continue
-    # Sort by published if possible
     return {"items": items[:50]}
 
 
@@ -218,12 +321,13 @@ def trending_players():
 
 @app.get("/api/tweets")
 def get_tweets(query: str = Query(..., description="Twitter handle or search query")):
-    """Fetch tweets via X API v2 if configured. Otherwise, return empty list.
+    """Fetch tweets via X API v2 if configured. Otherwise, return helpful sample tweets.
     Configure with X_BEARER_TOKEN environment variable.
     """
     token = os.getenv("X_BEARER_TOKEN")
     if not token:
-        return {"tweets": [], "note": "X_BEARER_TOKEN not configured"}
+        # Return curated sample so UI is not empty during development
+        return {"tweets": SAMPLE_TWEETS, "note": "Using sample tweets (set X_BEARER_TOKEN to fetch real tweets)"}
     headers = {"Authorization": f"Bearer {token}"}
     params = {"query": query, "tweet.fields": "created_at,public_metrics", "max_results": 10}
     r = requests.get("https://api.twitter.com/2/tweets/search/recent", headers=headers, params=params, timeout=15)
